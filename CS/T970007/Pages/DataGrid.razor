@@ -1,0 +1,192 @@
+﻿@page "/datagrid"
+
+@using T970007.Data
+@inject WeatherForecastService ForecastService
+@inject IJSRuntime JS;
+
+@if (forecasts == null) {
+    <p><em>Loading...</em></p>
+}
+else {
+    <DxDataGrid @ref="MyGrid" Data="@forecasts" CssClass="MyGridMarkerCss" PageSize="5"
+                HtmlRowDecoration="OnHtmlRowDecoration"
+                SelectionMode="DataGridSelectionMode.SingleSelectedDataRow"
+                @bind-SingleSelectedDataRow="selectedForecast"
+                RowClick="OnRowClick">
+        <Columns>
+            <DxDataGridDateEditColumn Field="Date">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            DateTime currentDate = currentObj.Date;
+                            if (EditMode && selectedForecast == currentObj) {
+                            <DxDateEdit @bind-Date="editedForecast.Date"></DxDateEdit>
+                            }
+                            else {
+                            <div>@currentDate.ToShortDateString()</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridDateEditColumn>
+            <DxDataGridColumn Field="Summary">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            string currentSummary = currentObj.Summary;
+                            if (EditMode && selectedForecast == currentObj) {
+                            <DxTextBox @bind-Text="editedForecast.Summary" BindValueMode="BindValueMode.OnInput"></DxTextBox>
+                            }
+                            else {
+                            <div>@currentSummary</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridColumn>
+            <DxDataGridSpinEditColumn Caption="Temperature" Field="TemperatureC" TextAlignment="DataGridTextAlign.Left">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            int currentTemp = currentObj.TemperatureC;
+                            if (EditMode && selectedForecast == currentObj) {
+                            <DxSpinEdit @bind-Value="editedForecast.TemperatureC" BindValueMode="BindValueMode.OnInput"></DxSpinEdit>
+                            }
+                            else {
+                            <div>@(currentTemp.ToString() + " C")</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridSpinEditColumn>
+        </Columns>
+    </DxDataGrid>
+}
+
+@code {
+    private List<WeatherForecast> forecasts = new List<WeatherForecast>();
+    private WeatherForecast editedForecast;
+    private WeatherForecast selectedForecast;
+    private bool EditMode = false;
+    private DxDataGrid<WeatherForecast> MyGrid;
+    private Dictionary<int, WeatherForecast> recordsWithIndecies = new Dictionary<int, WeatherForecast>();
+    protected override async Task OnInitializedAsync() {
+        var fromService = await ForecastService.GetForecastAsync();
+        UpdateDataSource(fromService);
+    }
+    protected override Task OnAfterRenderAsync(bool firstRender) {
+        JS.InvokeVoidAsync("preparePage", DotNetObjectReference.Create(this), "MyGridMarkerCss");
+        return base.OnAfterRenderAsync(firstRender);
+    }
+    void OnHtmlRowDecoration(DataGridHtmlRowDecorationEventArgs<WeatherForecast> eventArgs) {
+        if (recordsWithIndecies.ContainsKey(eventArgs.VisibleIndex))
+            recordsWithIndecies.Remove(eventArgs.VisibleIndex);
+        recordsWithIndecies.TryAdd(eventArgs.VisibleIndex, eventArgs.DataItem);
+    }
+    void OnRowClick(DataGridRowClickEventArgs<WeatherForecast> args) {
+        args.Handled = true;
+        if (args.DataItem != selectedForecast && EditMode == false) {
+            selectedForecast = args.DataItem;
+            StateHasChanged();
+        }
+        else if (args.DataItem == selectedForecast && EditMode == false) {
+            StartEditRow();
+        }
+        else if (args.DataItem != selectedForecast && EditMode == true) {
+            ForecastService.Update(editedForecast, editedForecast.ID);
+            selectedForecast = args.DataItem;
+            StateHasChanged();
+            StartEditRow();
+        }
+    }
+    [JSInvokable("CommandButtonClicked")]
+    public async Task F2Clicked(string keyCode) {
+        if (keyCode == "F2") {
+            if (selectedForecast != null && EditMode == false) {
+                StartEditRow();
+            }
+            else if (selectedForecast != null && EditMode == true) {
+                await ForecastService.Update(editedForecast, editedForecast.ID);
+                EndEditRow();
+            }
+        }
+        else if (keyCode == "ArrowDown") {
+            if (selectedForecast != null && EditMode == false) {
+                var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
+                if (index != recordsWithIndecies.Count - 1) {
+                    selectedForecast = recordsWithIndecies[index + 1];
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        else if (keyCode == "ArrowUp") {
+            if (selectedForecast != null && EditMode == false) {
+                var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
+                if (index != 0) {
+                    selectedForecast = recordsWithIndecies[index - 1];
+                    await InvokeAsync(StateHasChanged);
+                }
+            }
+        }
+        else if (keyCode == "Escape") {
+            if (EditMode == true) {
+                EndEditRow();
+            }
+        }
+    }
+    [JSInvokable("ClickOutsideContentTable")]
+    public void ClickOutsideContentTable() {
+        if (EditMode == true) {
+            selectedForecast = null;
+            EndEditRow();
+        }
+    }
+    [JSInvokable("MoveNextRow")]
+    public async Task MoveNextRow() {
+        var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
+        await ForecastService.Update(editedForecast, editedForecast.ID);
+        if (index == recordsWithIndecies.Count - 1) {
+            selectedForecast = null;
+            EndEditRow();
+        }
+        else {
+            selectedForecast = recordsWithIndecies[index + 1];
+            await InvokeAsync(StateHasChanged);
+            StartEditRow();
+        }
+    }
+    [JSInvokable("MovePrevRow")]
+    public async Task MovePrevRow() {
+        var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
+        await ForecastService.Update(editedForecast, editedForecast.ID);
+        if (index == 0) {
+            selectedForecast = null;
+            EndEditRow();
+        }
+        else {
+            selectedForecast = recordsWithIndecies[index - 1];
+            await InvokeAsync(StateHasChanged);
+            StartEditRow();
+        }
+    }
+    protected void UpdateDataSource(List<WeatherForecast> newDataSource) {
+        forecasts.Clear();
+        foreach (WeatherForecast wf in newDataSource) {
+            forecasts.Add(new WeatherForecast() { ID = wf.ID, Date = wf.Date, Summary = wf.Summary, TemperatureC = wf.TemperatureC });
+        }
+    }
+    protected async void StartEditRow() {
+        EditMode = true;
+        editedForecast = selectedForecast;
+        await MyGrid.Refresh();
+        await JS.InvokeVoidAsync("addNavigationHandler");
+    }
+    protected async void EndEditRow() {
+        EditMode = false;
+        editedForecast = null;
+        var newDataSource = await ForecastService.GetForecastAsync();
+        UpdateDataSource(newDataSource);
+        if (selectedForecast != null) {
+            selectedForecast = forecasts.Find(x => x.ID == selectedForecast.ID);
+        }
+        await InvokeAsync(StateHasChanged);
+        await MyGrid.Refresh();
+    }
+}
