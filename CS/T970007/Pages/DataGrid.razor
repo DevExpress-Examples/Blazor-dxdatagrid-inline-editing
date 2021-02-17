@@ -76,64 +76,56 @@ else {
         return base.OnAfterRenderAsync(firstRender);
     }
     void OnHtmlRowDecoration(DataGridHtmlRowDecorationEventArgs<WeatherForecast> eventArgs) {
-        if (recordsWithIndecies.ContainsKey(eventArgs.VisibleIndex))
-            recordsWithIndecies.Remove(eventArgs.VisibleIndex);
-        recordsWithIndecies.TryAdd(eventArgs.VisibleIndex, eventArgs.DataItem);
+        recordsWithIndecies[eventArgs.VisibleIndex] = eventArgs.DataItem;
     }
     void OnRowClick(DataGridRowClickEventArgs<WeatherForecast> args) {
         args.Handled = true;
-        if (args.DataItem != selectedForecast && EditMode == false) {
-            selectedForecast = args.DataItem;
-            StateHasChanged();
+        if (args.DataItem != selectedForecast) {
+            if (EditMode) {
+                ForecastService.Update(editedForecast, editedForecast.ID);
+                selectedForecast = args.DataItem;
+                StateHasChanged();
+                StartEditRow();
+            }
+            else {
+                selectedForecast = args.DataItem;
+                StateHasChanged();
+            }
         }
-        else if (args.DataItem == selectedForecast && EditMode == false) {
-            StartEditRow();
-        }
-        else if (args.DataItem != selectedForecast && EditMode == true) {
-            ForecastService.Update(editedForecast, editedForecast.ID);
-            selectedForecast = args.DataItem;
-            StateHasChanged();
-            StartEditRow();
+        else {
+            if (!EditMode)
+                StartEditRow();
         }
     }
     [JSInvokable("CommandButtonClicked")]
     public async Task F2Clicked(string keyCode) {
+        if (keyCode == "Escape" && EditMode)
+            EndEditRow();
+        if (selectedForecast == null)
+            return;
         if (keyCode == "F2") {
-            if (selectedForecast != null && EditMode == false) {
-                StartEditRow();
-            }
-            else if (selectedForecast != null && EditMode == true) {
+            if (EditMode) {
                 await ForecastService.Update(editedForecast, editedForecast.ID);
                 EndEditRow();
             }
+            else
+                StartEditRow();
         }
-        else if (keyCode == "ArrowDown") {
-            if (selectedForecast != null && EditMode == false) {
-                var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
-                if (index != recordsWithIndecies.Count - 1) {
-                    selectedForecast = recordsWithIndecies[index + 1];
-                    await InvokeAsync(StateHasChanged);
-                }
-            }
-        }
-        else if (keyCode == "ArrowUp") {
-            if (selectedForecast != null && EditMode == false) {
-                var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
-                if (index != 0) {
-                    selectedForecast = recordsWithIndecies[index - 1];
-                    await InvokeAsync(StateHasChanged);
-                }
-            }
-        }
-        else if (keyCode == "Escape") {
-            if (EditMode == true) {
-                EndEditRow();
+        bool arrowDown = keyCode == "ArrowDown";
+        bool arrowUp = keyCode == "ArrowUp";
+        if ((arrowDown || arrowUp) && !EditMode) {
+            var index = recordsWithIndecies.FirstOrDefault(x => x.Value == selectedForecast).Key;
+            var checkIndex = arrowDown ? recordsWithIndecies.Count - 1 : 0;
+            var increment = arrowDown ? 1 : -1;
+            if (index != checkIndex) {
+                selectedForecast = recordsWithIndecies[index + increment];
+                await InvokeAsync(StateHasChanged);
             }
         }
     }
     [JSInvokable("ClickOutsideContentTable")]
     public void ClickOutsideContentTable() {
-        if (EditMode == true) {
+        if (EditMode) {
             selectedForecast = null;
             EndEditRow();
         }
@@ -183,9 +175,8 @@ else {
         editedForecast = null;
         var newDataSource = await ForecastService.GetForecastAsync();
         UpdateDataSource(newDataSource);
-        if (selectedForecast != null) {
+        if (selectedForecast != null)
             selectedForecast = forecasts.Find(x => x.ID == selectedForecast.ID);
-        }
         await InvokeAsync(StateHasChanged);
         await MyGrid.Refresh();
     }

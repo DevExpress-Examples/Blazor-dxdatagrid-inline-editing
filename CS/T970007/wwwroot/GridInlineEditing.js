@@ -1,6 +1,7 @@
 ﻿let myObject;
 let gridCssMarkerClass = "";
 let isInitialized = false;
+let currentEditedInputs;
 function preparePage(instance, cssClass) {
     if (isInitialized)
         return;
@@ -24,39 +25,33 @@ function preparePage(instance, cssClass) {
         }
     });
 }
-let currentEditedInputs;
 function addNavigationHandler() {
+    if (currentEditedInputs) {
+        for (let i = 0; i < currentEditedInputs.length; i++) {
+            currentEditedInputs[i].removeEventListener("keydown", onInputKeyDown);
+        }
+    }
     currentEditedInputs = document.querySelectorAll("." + gridCssMarkerClass + " .table-active input");
     for (let i = 0; i < currentEditedInputs.length; i++) {
-        currentEditedInputs[i].addEventListener("keydown", (e) => {
-            if (e.key === "Tab" || e.key == "Enter") {
-                let index = getIndexOfEditedInputs(e.target);
-                if (index == -1) return;
-                if (e.shiftKey) {
-                    if (index == 0) {
-                        //firstInput
-                        invokeBlazorChangeEvent(currentEditedInputs[index]);
-                        myObject.invokeMethodAsync("MovePrevRow");
-                    }
-                    else {
-                        currentEditedInputs[index - 1].focus();
-                    }
-                }
-                else {
-                    if (index == currentEditedInputs.length - 1) {
-                        //lastInput
-                        invokeBlazorChangeEvent(currentEditedInputs[index]);
-                        myObject.invokeMethodAsync("MoveNextRow");
-                    }
-                    else {
-                        currentEditedInputs[index + 1].focus();
-                    }
-                }
-                event.preventDefault();
-            }
-        });
+        currentEditedInputs[i].addEventListener("keydown", onInputKeyDown);
     }
     currentEditedInputs[0].focus();
+}
+function onInputKeyDown(e) {
+    if (e.key === "Tab" || e.key == "Enter") {
+        let index = getIndexOfEditedInputs(e.target);
+        if (index == -1) return;
+        let marginalIndex = e.shiftKey ? 0 : currentEditedInputs.length - 1;
+        if (index == marginalIndex) {
+            invokeBlazorChangeEvent(currentEditedInputs[index]);
+            myObject.invokeMethodAsync(e.shiftKey ? "MovePrevRow" : "MoveNextRow");
+        }
+        else {
+            let newIndex = e.shiftKey ? index - 1 : index + 1;
+            currentEditedInputs[newIndex].focus();
+        }
+        event.preventDefault();
+    }
 }
 function getIndexOfEditedInputs(el) {
     let index = -1;
