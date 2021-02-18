@@ -1,18 +1,108 @@
 ﻿@page "/"
 
-<h2 class="pb-2">Blazor Components</h2>
-<p class="pb-2">
-    Our Blazor UI components will help you create intuitive and highly-refined user experiences for both Blazor Server (ASP.NET Core) and Blazor WebAssembly hosting models.
-</p>
-<div class="pb-2">
-    <img class="fit-width" src="images/banner.png" />
-</div>
+@using T970007.Data
+@inject WeatherForecastService ForecastService
 
-<h2 class="mb-4 mt-4">Helpful Resources</h2>
-
-<ul>
-    <li><a class="helplink" href="https://demos.devexpress.com/blazor/" target="_blank">Online Demos</a></li>
-    <li><a class="helplink" href="https://github.com/DevExpress/Blazor/blob/master/examples.md" target="_blank">Examples</a></li>
-    <li><a class="helplink" href="https://docs.devexpress.com/Blazor/400725/blazor-components" target="_blank">Documentation</a></li>
-    <li><a class="helplink" href="https://www.devexpress.com/support/training/blazor/" target="_blank">Free Blazor Training Course</a></li>
-</ul>
+@if (forecasts == null) {
+    <p><em>Loading...</em></p>
+}
+else {
+    <DxDataGrid @ref="MyGrid" Data="@forecasts" PageSize="5"
+                SelectionMode="DataGridSelectionMode.None">
+        <Columns>
+            <DxDataGridCommandColumn Width="150px">
+                <CellTemplate>
+                    @{
+                        if (EditMode && editedForecast == (context as WeatherForecast)) {
+                            <DxButton Text="Save" RenderStyle="ButtonRenderStyle.Link"
+                                      Click="@(async (e) => await UpdateChangesAsync())"></DxButton>
+                            <DxButton Text="Cancel" RenderStyle="ButtonRenderStyle.Link"
+                                      Click="@(async (e) => await CancelEditingAsync())"></DxButton>
+                        }
+                        else {
+                            <DxButton Text="Edit" RenderStyle="ButtonRenderStyle.Link"
+                                      Click="@(async (e) => await StartEditAsync(context as WeatherForecast))"></DxButton>
+                        }
+                    }
+                </CellTemplate>
+            </DxDataGridCommandColumn>
+            <DxDataGridDateEditColumn Field="Date">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            DateTime currentDate = currentObj.Date;
+                            if (EditMode && editedForecast == currentObj) {
+                            <DxDateEdit @bind-Date="editedForecast.Date"></DxDateEdit>
+                            }
+                            else {
+                            <div>@currentDate.ToShortDateString()</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridDateEditColumn>
+            <DxDataGridColumn Field="Summary">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            string currentSummary = currentObj.Summary;
+                            if (EditMode && editedForecast == currentObj) {
+                            <DxTextBox @bind-Text="editedForecast.Summary" BindValueMode="BindValueMode.OnInput"></DxTextBox>
+                            }
+                            else {
+                            <div>@currentSummary</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridColumn>
+            <DxDataGridSpinEditColumn Caption="Temperature" Field="TemperatureC" TextAlignment="DataGridTextAlign.Left">
+                <DisplayTemplate>
+                    @{
+                            WeatherForecast currentObj = (WeatherForecast)context;
+                            int currentTemp = currentObj.TemperatureC;
+                            if (EditMode && editedForecast == currentObj) {
+                            <DxSpinEdit @bind-Value="editedForecast.TemperatureC" BindValueMode="BindValueMode.OnInput"></DxSpinEdit>
+                            }
+                            else {
+                            <div>@(currentTemp.ToString() + " C")</div>
+                            }
+                    }
+                </DisplayTemplate>
+            </DxDataGridSpinEditColumn>
+        </Columns>
+    </DxDataGrid>
+}
+@code {
+    private List<WeatherForecast> forecasts = new List<WeatherForecast>();
+    private WeatherForecast editedForecast;
+    private bool EditMode = false;
+    private DxDataGrid<WeatherForecast> MyGrid;
+    protected async Task StartEditAsync(WeatherForecast forecast) {
+        EditMode = true;
+        editedForecast = forecast;
+        await MyGrid.Refresh();
+    }
+    protected async Task UpdateChangesAsync() {
+        await ForecastService.Update(editedForecast, editedForecast.ID);
+        await EndEditAsync();
+    }
+    protected async Task CancelEditingAsync() {
+        var newDataSource = await ForecastService.GetForecastAsync();
+        UpdateDataSource(newDataSource);
+        await EndEditAsync();
+    }
+    protected override async Task OnInitializedAsync() {
+        var fromService = await ForecastService.GetForecastAsync();
+        UpdateDataSource(fromService);
+    }
+    protected void UpdateDataSource(List<WeatherForecast> newDataSource) {
+        forecasts.Clear();
+        foreach (WeatherForecast wf in newDataSource) {
+            forecasts.Add(new WeatherForecast() { ID = wf.ID, Date = wf.Date, Summary = wf.Summary, TemperatureC = wf.TemperatureC });
+        }
+    }
+    protected async Task EndEditAsync() {
+        editedForecast = null;
+        EditMode = false;
+        await MyGrid.Refresh();
+    }
+}
