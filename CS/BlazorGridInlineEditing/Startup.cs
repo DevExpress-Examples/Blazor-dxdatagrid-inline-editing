@@ -1,11 +1,11 @@
+using BlazorGridInlineEditing.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using T970007.Data;
 
-namespace T970007
+namespace BlazorGridInlineEditing
 {
     public class Startup
     {

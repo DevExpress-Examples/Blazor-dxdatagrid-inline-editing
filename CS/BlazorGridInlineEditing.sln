@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30803.129
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "T970007", "T970007\T970007.csproj", "{CBBCD7BF-A13F-451D-9CB1-BED21B0691C9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlazorGridInlineEditing", "BlazorGridInlineEditing\BlazorGridInlineEditing.csproj", "{B3F371E0-9DE0-4F5F-951C-19E71FFCE303}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,15 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CBBCD7BF-A13F-451D-9CB1-BED21B0691C9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CBBCD7BF-A13F-451D-9CB1-BED21B0691C9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CBBCD7BF-A13F-451D-9CB1-BED21B0691C9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CBBCD7BF-A13F-451D-9CB1-BED21B0691C9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B3F371E0-9DE0-4F5F-951C-19E71FFCE303}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3F371E0-9DE0-4F5F-951C-19E71FFCE303}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3F371E0-9DE0-4F5F-951C-19E71FFCE303}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3F371E0-9DE0-4F5F-951C-19E71FFCE303}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {494DFE80-46F8-4629-81DF-1450C4381B6E}
+		SolutionGuid = {39D77C0F-FCEF-48C9-9410-B2046738B6CB}
 	EndGlobalSection
 EndGlobal

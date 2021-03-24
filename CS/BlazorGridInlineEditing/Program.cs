@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Hosting;
 
-namespace T970007
+namespace BlazorGridInlineEditing
 {
     public class Program
     {

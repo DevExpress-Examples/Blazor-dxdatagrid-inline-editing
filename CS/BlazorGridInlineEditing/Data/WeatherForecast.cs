@@ -1,6 +1,6 @@
 using System;
 
-namespace T970007.Data
+namespace BlazorGridInlineEditing.Data
 {
     public class WeatherForecast
     {
