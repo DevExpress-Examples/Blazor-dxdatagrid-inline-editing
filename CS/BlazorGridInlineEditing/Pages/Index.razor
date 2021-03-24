@@ -7,7 +7,7 @@
     <p><em>Loading...</em></p>
 }
 else {
-    <DxDataGrid Data="@forecasts" PageSize="5"
+    <DxDataGrid Data="@forecasts" PageSize="5" @ref="grid"
                 SelectionMode="DataGridSelectionMode.None">
         <Columns>
             <DxDataGridCommandColumn Width="150px">
@@ -71,6 +71,7 @@ else {
 }
 @code {
     private List<WeatherForecastForEdit> forecasts = new List<WeatherForecastForEdit>();
+    DxDataGrid<WeatherForecastForEdit> grid;
     protected override async Task OnInitializedAsync() {
         var fromService = await ForecastService.GetForecastAsync();
         UpdateDataSource(fromService);
@@ -83,8 +84,11 @@ else {
             item.Date = updatedItem.Date;
             item.Summary = updatedItem.Summary;
             item.TemperatureC = updatedItem.TemperatureC;
+            item.IsInEditMode = false;
         }
-        item.IsInEditMode = false;
+        else {
+            await grid.Refresh();
+        }
     }
     protected void UpdateDataSource(List<WeatherForecast> newDataSource) {
         forecasts.Clear();
