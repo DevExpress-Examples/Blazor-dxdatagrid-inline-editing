@@ -5,6 +5,9 @@
 * [WeatherForecastForEdit.cs](./CS/BlazorGridInlineEditing/Data/WeatherForecastForEdit.cs)
 
 ### DataGrid for Blazor - How to implement the inline edit mode using DisplayTemplate
+<!-- run online -->
+**[[Run Online]](https://codecentral.devexpress.com/351812089/)**
+<!-- run online end -->
 
 This example illustrates a possible implementation of the scenario when cell values are edited within the in-line edit row. 
 The main idea of the demonstrated solution is to create the *[DisplayTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxDataGridColumn.DisplayTemplate)* template for each column and display the corresponding value or an editor based on the state of the current row. 
