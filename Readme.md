@@ -15,7 +15,7 @@
 This example illustrates a possible implementation of the case when users can edit values in the inline edit row. 
 The main idea of the solution is to create the [DisplayTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxDataGridColumn.DisplayTemplate) for each column and display the corresponding value or an editor based on the state of the current row. 
 
-The **IsInEditMode** custom property defines the state of the current row. You can find the implementation of this custom property in the [WeatherForecastForEdit](./CS/BlazorGridInlineEditing/Data/WeatherForecastForEdit.cs) class. This class inherits the original *[WeatherForecast](./CS/BlazorGridInlineEditing/Data/WeatherForecast.cs)* model class and extends it with the **IsInEditMode** property. 
+The **IsInEditMode** custom property defines the state of the current row. You can find the implementation of this custom property in the [WeatherForecastForEdit](./CS/BlazorGridInlineEditing/Data/WeatherForecastForEdit.cs) class. This class inherits the original [WeatherForecast](./CS/BlazorGridInlineEditing/Data/WeatherForecast.cs) model class and extends it with the **IsInEditMode** property. 
 
 Also the **WeatherForecastForEdit** class implements the [INotifyPropertyChanged](https://docs.microsoft.com/en-us/dotnet/api/system.componentmodel.inotifypropertychanged?view=net-5.0) interface. The Data Grid automatically detects such interfaces and handles the **PropertyChanged** event, so that if the corresponding property value changes, the DxDataGrid component re-renders the corresponding row. 
 
