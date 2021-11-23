@@ -8,10 +8,6 @@
 
 ![Data Grid - Inline edit form](images/dxdatagrid-inline-editing.gif)
 
-<!-- run online -->
-**[[Run Online]](https://codecentral.devexpress.com/351812089/)**
-<!-- run online end -->
-
 This example illustrates how to allow users to edit values in the inline edit row. 
 
 The main idea of the solution is to create the [DisplayTemplate](https://docs.devexpress.com/Blazor/DevExpress.Blazor.DxDataGridColumn.DisplayTemplate) for each column and display the corresponding value or an editor based on the state of the current row. 
