@@ -6,7 +6,7 @@
 
 # DataGrid for Blazor - How to implement the inline edit mode with the DisplayTemplate
 
-![Data Grid - Inline edit form](images/dxdatsgrid-inline-editing.gif)
+![Data Grid - Inline edit form](images/dxdatagrid-inline-editing.gif)
 
 <!-- run online -->
 **[[Run Online]](https://codecentral.devexpress.com/351812089/)**
