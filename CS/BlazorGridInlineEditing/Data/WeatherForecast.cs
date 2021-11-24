@@ -1,9 +1,7 @@
 using System;
 
-namespace BlazorGridInlineEditing.Data
-{
-    public class WeatherForecast
-    {
+namespace BlazorGridInlineEditing.Data {
+    public class WeatherForecast {
         public int ID { get; set; }
         public DateTime Date { get; set; }
 

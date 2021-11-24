@@ -2,10 +2,8 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace BlazorGridInlineEditing.Data
-{
-    public class WeatherForecastForEdit : WeatherForecast, INotifyPropertyChanged
-    {
+namespace BlazorGridInlineEditing.Data {
+    public class WeatherForecastForEdit : WeatherForecast, INotifyPropertyChanged {
         public event PropertyChangedEventHandler PropertyChanged;
         private bool _IsInEditMode { get; set; } = false;
         public bool IsInEditMode {
